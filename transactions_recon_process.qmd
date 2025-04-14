@@ -1,0 +1,135 @@
+---
+title: "Transactions Recon Process"
+format: 
+  html:
+    code-fold: true
+    toc: true
+    toc-depth: 3
+    theme: cosmo
+---
+
+# Current Process Overview
+The current payment tracking process involves managing royalty payments across multiple contracts assigned to various artist/label profiles. This process relies on two CSV files provided monthly by Neal:
+
+1. **Profile-Level Payment CSV**: Contains a list of all parties due to receive payments, including profile details, company names, and the main contract associated with each profile.
+
+2. **Contract-Level Breakdown CSV**: Provides detailed information on all contracts (1,000+), showing earnings for each individual contract under various profiles.
+
+The payment processor (Grant) must manually match profiles to their associated contracts to determine which contracts have been paid when a profile payment is made. This information is then entered into a Curve transaction sheet that serves as a ledger to track payments and zero out contract balances.
+
+## Current Process Diagram
+
+::: {.panel-tabset}
+### Diagram
+```{mermaid}
+%%{init: {"flowchart": {"htmlLabels": true, "curve": "basis"}, "theme": "base", "themeVariables": {"primaryColor": "#ffffff", "primaryTextColor": "#000000", "primaryBorderColor": "#000000", "lineColor": "#000000", "secondaryColor": "#ffffff", "tertiaryColor": "#ffffff"}}}%%
+flowchart TB
+    %% Style definitions
+    classDef default fill:#ffffff,stroke:#000000,color:black
+    
+    A[Neal sends 2 CSV files monthly] --> B[CSV 1: Profile-level payment amounts]
+    A --> C[CSV 2: Contract-level breakdown]
+    B --> D{Manual Processing}
+    C --> D
+    D --> E[Mark payments in spreadsheet]
+    E --> F[Manually search/match profiles & contracts]
+    F --> G[Add payment entries to Curve transaction sheet]
+    G --> H[Zero out contract balances in Curve]
+    
+    D --> P1[Difficult to match profiles to contracts]
+    D --> P2[Manual search through 1000+ contracts]
+    P1 --> P3[Time-consuming process]
+    P2 --> P3
+    P3 --> P4[Prone to errors]
+```
+
+### Mermaid Code
+```
+%%{init: {"flowchart": {"htmlLabels": true, "curve": "basis"}, "theme": "base", "themeVariables": {"primaryColor": "#ffffff", "primaryTextColor": "#000000", "primaryBorderColor": "#000000", "lineColor": "#000000", "secondaryColor": "#ffffff", "tertiaryColor": "#ffffff"}}}%%
+flowchart TB
+    %% Style definitions
+    classDef default fill:#ffffff,stroke:#000000,color:black
+    
+    A[Neal sends 2 CSV files monthly] --> B[CSV 1: Profile-level payment amounts]
+    A --> C[CSV 2: Contract-level breakdown]
+    B --> D{Manual Processing}
+    C --> D
+    D --> E[Mark payments in spreadsheet]
+    E --> F[Manually search/match profiles & contracts]
+    F --> G[Add payment entries to Curve transaction sheet]
+    G --> H[Zero out contract balances in Curve]
+    
+    D --> P1[Difficult to match profiles to contracts]
+    D --> P2[Manual search through 1000+ contracts]
+    P1 --> P3[Time-consuming process]
+    P2 --> P3
+    P3 --> P4[Prone to errors]
+```
+:::
+
+## Key Challenges
+The current process faces several significant challenges:
+
+- **Complex Profile-Contract Relationships**: Some profiles (like labels) manage numerous artist contracts, with payments going to the profile rather than individual contracts.
+- **Threshold Handling**: Some contracts individually fall below payment thresholds but combine with others under the same profile to reach the threshold for payment.
+- **Manual Matching**: There's no direct way to link profiles to their associated contracts, requiring time-consuming manual searches through over 1,000 contracts.
+- **Error Susceptibility**: The manual nature of matching and marking payments increases the risk of mistakes.
+
+# Proposed Solution
+The proposed improvement centers on implementing a unique identifier system:
+
+1. **Unique Profile Codes**: Assign a unique code (e.g., "XYZ777") to each profile.
+2. **Code Implementation**: Add this code to both CSV files - in the profile payment CSV and alongside each contract in the contract breakdown CSV that belongs to that profile.
+3. **Automated Matching**: Use VLOOKUP or similar functions to automatically match paid profiles to all their associated contracts.
+4. **Streamlined Workflow**: Once a profile is marked as paid, all its contracts can be automatically identified and recorded in the Curve ledger.
+
+## Proposed Solution Diagram
+
+::: {.panel-tabset}
+### Diagram
+```{mermaid}
+%%{init: {"flowchart": {"htmlLabels": true, "curve": "basis"}, "theme": "base", "themeVariables": {"primaryColor": "#ffffff", "primaryTextColor": "#000000", "primaryBorderColor": "#000000", "lineColor": "#000000", "secondaryColor": "#ffffff", "tertiaryColor": "#ffffff"}}}%%
+flowchart TB
+    %% Style definitions
+    classDef default fill:#ffffff,stroke:#000000,color:black
+    
+    S1[Add unique profile codes to both CSVs] --> S2[Link profile code to all associated contracts]
+    S2 --> S3[Use VLOOKUP between CSVs]
+    S3 --> S4[Automated matching of payments to contracts]
+    S4 --> S5[Single source of truth in Curve ledger]
+```
+
+### Mermaid Code
+```
+%%{init: {"flowchart": {"htmlLabels": true, "curve": "basis"}, "theme": "base", "themeVariables": {"primaryColor": "#ffffff", "primaryTextColor": "#000000", "primaryBorderColor": "#000000", "lineColor": "#000000", "secondaryColor": "#ffffff", "tertiaryColor": "#ffffff"}}}%%
+flowchart TB
+    %% Style definitions
+    classDef default fill:#ffffff,stroke:#000000,color:black
+    
+    S1[Add unique profile codes to both CSVs] --> S2[Link profile code to all associated contracts]
+    S2 --> S3[Use VLOOKUP between CSVs]
+    S3 --> S4[Automated matching of payments to contracts]
+    S4 --> S5[Single source of truth in Curve ledger]
+```
+:::
+
+## Expected Benefits
+- **Efficiency**: Dramatically reduce the time required to process monthly payments
+- **Accuracy**: Minimize human error in matching profiles to contracts
+- **Reliability**: Create a more dependable system for tracking payments
+- **Scalability**: Better handle growing numbers of profiles and contracts
+- **Consistency**: Maintain Curve as a trusted source of payment information
+
+This solution addresses the core issue by establishing a clear relationship between profiles and their contracts, eliminating the need for manual searching and matching across multiple spreadsheets.
+
+## Implementation Considerations
+
+To implement this solution, the following steps would be required:
+
+1. Create a system for generating and assigning unique profile codes
+2. Update the CSV export processes to include these codes in both files
+3. Develop a spreadsheet template with appropriate VLOOKUP formulas
+4. Test the process with a sample dataset before full implementation
+5. Document the new process for future reference and training
+
+The technical changes required are minimal, primarily involving the addition of an identifier field to existing data exports, while the potential time savings and error reduction are substantial.
